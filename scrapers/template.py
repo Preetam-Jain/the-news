@@ -8,8 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
 import pandas as pd
 import time
 
@@ -39,23 +37,23 @@ for url in urls:
 
 def get_links(soup):
     class_string = 'card.container__item.container__item--type-media-image.container__item--type-.container_list-images-with-description__item.container_list-images-with-description__item--type-'
-    links = []
+    links = set()
     articles = soup.select(f'div.{class_string}')
     for article in articles:
         a_tag = article.find('a')
         if a_tag and a_tag['href']:
-            links.extend(a_tag['href'])
+            links.add(a_tag['href'])
     return links
 
 AI_search_query = 'https://www.cnn.com/search?q=artificial+intelligence&size=20&sort=newest&types=article'
-
+palestine_search_query = 'https://www.cnn.com/search?q=palestine&size=20&sort=newest&types=article'
 # setting up selenium web driver
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service)
 wait = WebDriverWait(driver, 15)
 
 # passing in the url query
-driver.get(AI_search_query)
+driver.get(palestine_search_query)
 # waiting for results to load
 time.sleep(3)
 html = driver.page_source
@@ -69,10 +67,10 @@ count = int(search_count_element[31:countEndIndex])
 # getting the button we need to navigate search results
 pagination_button = driver.find_element(By.CLASS_NAME, 'pagination-arrow-right')
 
-total_links = []
+total_links = set()
 while count - 1 > len(total_links):
     # adding all the links per each search result page
-    total_links.extend(get_links(soup))
+    total_links.update(get_links(soup))
     try:
         pagination_button.click()
         # need this random wait so don't get rate limited
