@@ -16,7 +16,7 @@ This software is not open source and unauthorized copying, redistribution, or us
 source the_news/bin/activate
 
 ## Libraries used
-requests, Beautiful Soup
+Selenium, Beautiful Soup
 
 
 
