@@ -39,27 +39,62 @@ def scrape(topic, driver, wait, last_updated):
     last_updated_month = last_updated.month
     last_updated_year = last_updated.year
     current_month = current_date.month
-
+    total_links = set()
+    
     for month in range(last_updated_month, current_month + 1):
+        # getting the range of days we need to search for for every month
         range_of_days = format_range(month)
+
         for i in range(len(range_of_days)):
             first_day, last_day = range_of_days[i]
+
+            # loading fox's search page
             driver.get(FOX_info['search query'])
+
+            # need random waits to avoid getting flagged as a scraper
             time.sleep(random.randint(2, 4))
+
+            # specifying we're searching articles
             content_type_button = get_button(wait, FOX_info['content type button'])
             click(content_type_button)
             select_articles_button = get_button(wait, FOX_info['select articles button'])
             click(select_articles_button)
+
+            # selecting the designated range (10 days)
             select_range(month, (first_day, last_day), last_updated_year, wait)
+
+            # entering our search term
             search_box = driver.find_element(By.XPATH, FOX_info['search box'])
             search_box.send_keys(topic)
             time.sleep(random.randint(1, 2))
+
+            # submitting our query
             submit_button = get_button(wait, FOX_info['search submit'])
             click(submit_button)
+
+            # we need to load all the results as they only initially load 10 at a time
             load_more_button = get_button(wait, FOX_info['load more'])
             while load_more_button is not None:
                 click(load_more_button)
                 load_more_button = get_button(wait, FOX_info['load more'])
+
+            # once all the results are loaded we need to get all the links from the page
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+            total_links.update(get_links(soup))
+        
+        print(total_links)
+        print(len(total_links))
+
+def get_links(soup):
+    links = set()
+    articles = soup.select(f'article.article')
+
+    for article in articles:
+        a_tag = article.find('a')
+        if a_tag and a_tag['href']:
+            links.add(a_tag['href'])
+    return links
 
 # each month has a different range of days we need to sort for, we have to do 10 days at a time or we get too many articles
 # the max amount of articles the search can pull is 100 so we have to get less than that per search
