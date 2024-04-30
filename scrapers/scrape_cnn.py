@@ -19,7 +19,7 @@ CNN_info = {
     'search results element': 'search__results'
 }
 
-def scrape(topic, driver, wait, last_updated):
+def scrape_link(topic, driver, wait, last_updated):
     search_query = CNN_info['search query']
     topic = topic.replace(' ', '+')
     search_query = search_query.format(topic)

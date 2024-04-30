@@ -3,7 +3,7 @@ This software is not open source and unauthorized copying, redistribution, or us
 
 ## Original project requirements
 1. Scrape articles from major news sources
-2. Original sources: CNN, Fox, MSNBC, NYT, Wall-Street Journal
+2. Original sources: CNN, Fox, MSNBC, NYT, The Washington Post (Moved to just CNN and Fox for now)
 3. Original list of topics: Palestine, 2024 Elections, AI, TikTok Ban, Climate Change
 4. Aggregate and order article headlines, summaries, and AI analysis chronologically
 5. Organize by topic, comparing each source's opinions and bias and their change over time

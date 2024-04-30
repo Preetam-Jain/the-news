@@ -10,9 +10,9 @@ from selenium.common.exceptions import TimeoutException
 import time
 import datetime
 from months import Month
+import button
 
 current_date = datetime.date.today()
-
 FOX_info = {
     'search count element': 'num-found',
     'search query': 'https://www.foxnews.com/search',
@@ -35,7 +35,7 @@ FOX_info = {
     'max year selector': '//div[@class="date max"]//div[@class="sub year"]//li[@id="{}"]'
 }
 
-def scrape(topic, driver, wait, last_updated):
+def scrape_links(topic, driver, wait, last_updated):
     last_updated_month = last_updated.month
     last_updated_year = last_updated.year
     current_month = current_date.month
@@ -55,10 +55,10 @@ def scrape(topic, driver, wait, last_updated):
             time.sleep(random.randint(2, 4))
 
             # specifying we're searching articles
-            content_type_button = get_button(wait, FOX_info['content type button'])
-            click(content_type_button)
-            select_articles_button = get_button(wait, FOX_info['select articles button'])
-            click(select_articles_button)
+            content_type_button = button.get_button(wait, FOX_info['content type button'])
+            button.click(content_type_button)
+            select_articles_button = button.get_button(wait, FOX_info['select articles button'])
+            button.click(select_articles_button)
 
             # selecting the designated range (10 days)
             select_range(month, (first_day, last_day), last_updated_year, wait)
@@ -69,14 +69,14 @@ def scrape(topic, driver, wait, last_updated):
             time.sleep(random.randint(1, 2))
 
             # submitting our query
-            submit_button = get_button(wait, FOX_info['search submit'])
-            click(submit_button)
+            submit_button = button.get_button(wait, FOX_info['search submit'])
+            button.click(submit_button)
 
             # we need to load all the results as they only initially load 10 at a time
-            load_more_button = get_button(wait, FOX_info['load more'])
+            load_more_button = button.get_button(wait, FOX_info['load more'])
             while load_more_button is not None:
-                click(load_more_button)
-                load_more_button = get_button(wait, FOX_info['load more'])
+                button.click(load_more_button)
+                load_more_button = button.get_button(wait, FOX_info['load more'])
 
             # once all the results are loaded we need to get all the links from the page
             html = driver.page_source
@@ -115,14 +115,14 @@ def format_with_leading_zero(number):
 
 def click_date_component(button_name, value, selector_format, wait):
     # click the button to open the dropdown
-    button = get_button(wait, FOX_info[button_name])
-    click(button)
+    new_button = button.get_button(wait, FOX_info[button_name])
+    button.click(new_button)
     
     # select the value from the dropdown
     value_string = format_with_leading_zero(value)
     selector_xpath = selector_format.format(value_string)
-    selection_button = get_button(wait, selector_xpath)
-    click(selection_button)
+    selection_button = button.get_button(wait, selector_xpath)
+    button.click(selection_button)
 
 # selecting the time range we want articles from
 def select_range(month, day_range, year, wait):
@@ -135,17 +135,5 @@ def select_range(month, day_range, year, wait):
     click_date_component('max month', month, FOX_info['max month selector'], wait)
     click_date_component('max day', day_range[1], FOX_info['max day selector'], wait)
     click_date_component('max year', year, FOX_info['max year selector'], wait)
-
-        
-def get_button(wait, xpath):
-    try:
-        return wait.until(EC.element_to_be_clickable((By.XPATH, xpath)))
-    except TimeoutException:
-        return None
-
-
-# clicking button passed in and waiting a random time between 2 and 4 seconds
-def click(button):
-    button.click()
-    time.sleep(random.randint(2, 4))
+  
 
